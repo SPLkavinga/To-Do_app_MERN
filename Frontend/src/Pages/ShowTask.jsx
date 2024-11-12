@@ -5,6 +5,7 @@ function ShowTask() {
     const [isEditing, setIsEditing] = useState(false);
     const [currentTask, setCurrentTask] = useState({ id: '', name: '', description: '' });
     const [alert, setAlert] = useState({ show: false, message: '', type: '' });
+    const [filter, setFilter] = useState(''); // New state for filter
 
     // Fetch tasks from the API when the component mounts
     useEffect(() => {
@@ -95,6 +96,22 @@ function ShowTask() {
         setIsEditing(false);
     };
 
+    // Handle filter change
+    const handleFilterChange = (event) => {
+        setFilter(event.target.value);
+    };
+
+    // Filter tasks based on selected filter
+    const filteredTasks = tasks.sort((a, b) => {
+        if (filter === 'alphabetical') {
+            return a.name.localeCompare(b.name);
+        }
+        if (filter === 'date') {
+            return new Date(a.date) - new Date(b.date); // Assuming 'date' is part of each task object
+        }
+        return 0;
+    });
+
     return (
         <section className="min-h-screen p-4 bg-slate-100 sm:p-8">
             <div className="container mx-auto">
@@ -106,6 +123,20 @@ function ShowTask() {
                 )}
 
                 <h2 className="mb-6 text-2xl font-bold text-center text-gray-800 sm:text-3xl lg:text-4xl">Tasks List</h2>
+
+                {/* Filter Dropdown */}
+                <div className="flex justify-center mb-6 space-x-4">
+                    <select
+                        value={filter}
+                        onChange={handleFilterChange}
+                        className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    >
+                        <option value="">Select Filter</option>
+                        <option value="alphabetical">Alphabetical Order</option>
+                        <option value="date">By Date</option>
+                    </select>
+                </div>
+
                 <div className="overflow-x-auto">
                     <table className="min-w-full text-sm bg-white rounded-lg shadow-md">
                         <thead className="bg-gray-200">
@@ -116,7 +147,7 @@ function ShowTask() {
                             </tr>
                         </thead>
                         <tbody>
-                            {tasks.map((task) => (
+                            {filteredTasks.map((task) => (
                                 <tr key={task.id} className="border-b border-gray-200">
                                     <td className="px-2 py-2 text-sm text-gray-700 sm:px-4">{task.name}</td>
                                     <td className="px-2 py-2 text-sm text-gray-700 sm:px-4">{task.description}</td>
